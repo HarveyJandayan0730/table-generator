@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Generator</title>
+    <style>
+        .table-container {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        .ddl-table__row-header {
+            background-color: #f4f4f4;
+        }
+        .ddl-table__cell-header {
+            font-weight: bold;
+        }
+        .ddl-table__cell--align-center {
+            text-align: center;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="table-container">
+        <h2>HTML Table Generator</h2>
+        <textarea id="excelData" rows="10" cols="60" placeholder="Paste your Excel data here (comma separated or tab separated)"></textarea>
+        <br>
+        <button onclick="generateTable()">Generate Table</button>
+
+        <div id="tableOutput"></div>
+
+        <h3>Generated HTML Code</h3>
+        <pre id="htmlCodeOutput"></pre>
+        <button id="copyButton" onclick="copyHTML()">Copy HTML</button>
+    </div>
+
+    <script>
+        function generateTable() {
+            const data = document.getElementById('excelData').value.trim();
+            const tableOutput = document.getElementById('tableOutput');
+            const htmlCodeOutput = document.getElementById('htmlCodeOutput');
+            let html = '<div class="ddl-table ddl-table--outline"><div class="ddl-container"><div class="ddl-grid" style="padding:0px;"><div class="ddl-grid__col-12"><div class="ddl-table__table-container"><table>';
+
+            if (data) {
+                // Split the input by lines (each line is a row)
+                const rows = data.split('\n');
+                
+                // Create table header from the first row
+                html += '<thead>';
+                const headerCells = rows[0].split(/\t/); // Split by tab or comma
+                html += '<tr class="ddl-table__row-header ddl-table__row-header--underline">';
+                headerCells.forEach(cell => {
+                    html += `<th class="label ddl-table__cell-header">${wrapSpan(cell.trim())}</th>`;
+                });
+                html += '</tr>';
+                html += '</thead>';
+
+                // Create table body for the rest of the rows
+                html += '<tbody>';
+                rows.slice(1).forEach(row => {
+                    const cells = row.split(/\t/); // Split by tab or comma
+                    html += '<tr class="ddl-table__row">';
+                    cells.forEach(cell => {
+                        html += `<td class="ddl-table__cell ddl-table__cell--align-center">${wrapSpan(cell.trim())}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                html += '</tbody></div></div></div></div></div>';
+            }
+
+            html += '</table>';
+            tableOutput.innerHTML = html;
+            htmlCodeOutput.textContent = html;  // Show raw HTML code
+        }
+
+        // Helper function to wrap cell content in <span> tags
+        function wrapSpan(content) {
+            return content ? `<span>${content}</span>` : '';
+        }
+
+        // Function to copy the HTML code to the clipboard
+        function copyHTML() {
+            const htmlCodeOutput = document.getElementById('htmlCodeOutput');
+            const range = document.createRange();
+            range.selectNode(htmlCodeOutput);
+            window.getSelection().removeAllRanges(); // Clear current selection
+            window.getSelection().addRange(range);  // Select the code content
+            try {
+                document.execCommand('copy');
+                alert('HTML code copied to clipboard!');
+            } catch (err) {
+                alert('Failed to copy HTML code. Please try again.');
+            }
+            window.getSelection().removeAllRanges(); // Clear the selection after copying
+        }
+    </script>
+</body>
+</html>
